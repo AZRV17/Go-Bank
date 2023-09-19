@@ -4,13 +4,22 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/AZRV17/goWEB/internal/config"
+	handler "github.com/AZRV17/goWEB/internal/controller/http"
+	"github.com/AZRV17/goWEB/internal/service"
 	"github.com/AZRV17/goWEB/pkg/db/psql"
 )
 
 func Run() {
-	dsn := "postgres://root:sa@localhost:5431/gowebdb"
+	config, err := config.NewConfig("internal/config/config.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := psql.Connect(dsn)
+	dsn := "postgres://" + config.Postgres.User + ":" + config.Postgres.Password + "@" +
+		config.Postgres.Host + ":" + config.Postgres.Port + "/" + config.Postgres.Db
+
+	err = psql.Connect(dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,9 +33,13 @@ func Run() {
 		log.Fatal(db.Close())
 	}()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("We're live !!!"))
-	})
+	mux := http.NewServeMux()
 
-	http.ListenAndServe(":8080", nil)
+	service := service.NewService()
+	handler := handler.NewHandler(*service)
+
+	handler.Init(mux)
+
+	log.Println("Server started on port " + config.Server.Port)
+	log.Fatal(http.ListenAndServe(config.Server.Host+":"+config.Server.Port, mux))
 }

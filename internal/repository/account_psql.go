@@ -5,10 +5,50 @@ import (
 	"gorm.io/gorm"
 )
 
-type AccountRepo struct {
+type Account struct {
 	db *gorm.DB
 }
 
-func NewAccountRepo(db *gorm.DB) *AccountRepo {
-	return &AccountRepo{db: db.Model(&domain.Account{})}
+func NewAccountRepo(db *gorm.DB) *Account {
+	return &Account{db: db.Model(&domain.Account{})}
+}
+
+func (repo *Account) CreateAccount(owner string, balance int64, currency string) error {
+	err := repo.db.Create(&domain.Account{Owner: owner, Balance: balance, Currency: currency}).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (repo *Account) GetAccount(id int64) (domain.Account, error) {
+	var account domain.Account
+	err := repo.db.First(&account, id).Error
+	if err != nil {
+		return account, err
+	}
+
+	return account, nil
+}
+
+func (repo *Account) UpdateAccount(account domain.Account) error {
+	err := repo.db.Save(&account).Error
+	return err
+}
+
+func (repo *Account) DeleteAccount(id int64) error {
+	err := repo.db.Delete(&domain.Account{}, id).Error
+	return err
+}
+
+func (repo *Account) GetAllAccounts() ([]domain.Account, error) {
+	var accounts []domain.Account
+
+	err := repo.db.Find(&accounts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return accounts, nil
 }

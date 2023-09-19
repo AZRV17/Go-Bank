@@ -5,11 +5,15 @@ import (
 )
 
 type Repositories struct {
-	Account Account
+	Account  Account
+	Entry    Entry
+	Transfer Transfer
 }
 
 func NewRepositories(db *gorm.DB) *Repositories {
 	return &Repositories{
-		Account: *NewAccountRepo(db),
+		Account:  *NewAccountRepo(db),
+		Entry:    *NewEntryRepo(db),
+		Transfer: *NewTransferRepo(db),
 	}
 }

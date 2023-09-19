@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/AZRV17/goWEB/internal/domain"
 	"github.com/AZRV17/goWEB/internal/repository"
 )
@@ -15,8 +17,14 @@ func NewAccountService(repo repository.Account) *AccountService {
 	}
 }
 
-func (s *AccountService) CreateAccount(account domain.Account) error {
-	err := s.repo.CreateAccount(account)
+func (s *AccountService) CreateAccount(input CreateAccountInput) error {
+	account := domain.Account{
+		Owner:     input.Owner,
+		Balance:   input.Balance,
+		Currency:  input.Currency,
+		CreatedAt: time.Now(),
+	}
+	err := s.repo.Create(account)
 	return err
 }
 
@@ -30,18 +38,20 @@ func (s *AccountService) GetAllAccounts() ([]domain.Account, error) {
 	return accs, err
 }
 
-func (s *AccountService) UpdateAccount(id int64) error {
-	acc, err := s.repo.GetAccount(id)
-	if err != nil {
-		return err
+func (s *AccountService) UpdateAccount(input UpdateAccountInput) error {
+	account := domain.Account{
+		ID:        input.ID,
+		Owner:     input.Owner,
+		Balance:   input.Balance,
+		Currency:  input.Currency,
+		CreatedAt: time.Now(),
 	}
-
-	err = s.repo.UpdateAccount(*acc)
+	err := s.repo.Update(account)
 
 	return err
 }
 
 func (s *AccountService) DeleteAccount(id int64) error {
-	err := s.repo.DeleteAccount(id)
+	err := s.repo.Delete(id)
 	return err
 }

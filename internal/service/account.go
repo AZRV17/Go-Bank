@@ -3,27 +3,26 @@ package service
 import (
 	"github.com/AZRV17/goWEB/internal/domain"
 	"github.com/AZRV17/goWEB/internal/repository"
-	"github.com/AZRV17/goWEB/pkg/db/psql"
 )
 
 type AccountService struct {
 	repo repository.Account
 }
 
-func NewAccountService() *AccountService {
+func NewAccountService(repo repository.Account) *AccountService {
 	return &AccountService{
-		repo: *repository.NewAccountRepo(psql.DB),
+		repo: repo,
 	}
 }
 
-func (s *AccountService) CreateAccount(owner string, balance int64, currency string) error {
-	err := s.repo.CreateAccount(owner, balance, currency)
+func (s *AccountService) CreateAccount(account domain.Account) error {
+	err := s.repo.CreateAccount(account)
 	return err
 }
 
 func (s *AccountService) GetAccount(id int64) (domain.Account, error) {
 	acc, err := s.repo.GetAccount(id)
-	return acc, err
+	return *acc, err
 }
 
 func (s *AccountService) GetAllAccounts() ([]domain.Account, error) {
@@ -37,7 +36,7 @@ func (s *AccountService) UpdateAccount(id int64) error {
 		return err
 	}
 
-	err = s.repo.UpdateAccount(acc)
+	err = s.repo.UpdateAccount(*acc)
 
 	return err
 }

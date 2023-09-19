@@ -9,6 +9,7 @@ type Config struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`
 	}
+
 	Postgres struct {
 		Host     string `yaml:"host"`
 		Port     string `yaml:"port"`

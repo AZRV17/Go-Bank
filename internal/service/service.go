@@ -1,11 +1,15 @@
 package service
 
+import "github.com/AZRV17/goWEB/internal/repository"
+
 type Service struct {
 	AccountService *AccountService
+	repo           *repository.Repositories
 }
 
-func NewService() *Service {
+func NewService(repo *repository.Repositories) *Service {
 	return &Service{
-		AccountService: NewAccountService(),
+		repo:           repo,
+		AccountService: NewAccountService(repo.Account),
 	}
 }

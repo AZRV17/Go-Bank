@@ -13,8 +13,8 @@ func NewAccountRepo(db *gorm.DB) *Account {
 	return &Account{db: db.Model(&domain.Account{})}
 }
 
-func (repo *Account) CreateAccount(owner string, balance int64, currency string) error {
-	err := repo.db.Create(&domain.Account{Owner: owner, Balance: balance, Currency: currency}).Error
+func (repo *Account) CreateAccount(account domain.Account) error {
+	err := repo.db.Create(&account).Error
 	if err != nil {
 		return err
 	}
@@ -22,14 +22,14 @@ func (repo *Account) CreateAccount(owner string, balance int64, currency string)
 	return nil
 }
 
-func (repo *Account) GetAccount(id int64) (domain.Account, error) {
+func (repo *Account) GetAccount(id int64) (*domain.Account, error) {
 	var account domain.Account
 	err := repo.db.First(&account, id).Error
 	if err != nil {
-		return account, err
+		return nil, err
 	}
 
-	return account, nil
+	return &account, nil
 }
 
 func (repo *Account) UpdateAccount(account domain.Account) error {

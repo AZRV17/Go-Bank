@@ -65,7 +65,7 @@ type UpdateTransferInput struct {
 	CreatedAt     time.Time
 }
 
-type Transfer interface {
+type TransferServiceInterface interface {
 	CreateTransfer(input CreateTransferInput) (int64, error)
 	UpdateTransfer(input UpdateTransferInput) error
 	DeleteTransfer(id int64) error

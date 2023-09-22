@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"log"
+
 	"github.com/AZRV17/goWEB/internal/domain"
 	"gorm.io/gorm"
 )
@@ -13,13 +15,17 @@ func NewAccountRepo(db *gorm.DB) *Account {
 	return &Account{db: db.Model(&domain.Account{})}
 }
 
-func (repo *Account) Create(account domain.Account) error {
+func (repo *Account) Create(account domain.Account) (*domain.Account, error) {
 	err := repo.db.Create(&account).Error
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	var acc domain.Account
+
+	repo.db.Last(&acc)
+
+	return &acc, nil
 }
 
 func (repo *Account) GetAccount(id int64) (*domain.Account, error) {
@@ -32,9 +38,13 @@ func (repo *Account) GetAccount(id int64) (*domain.Account, error) {
 	return &account, nil
 }
 
-func (repo *Account) Update(account domain.Account) error {
-	err := repo.db.Save(&account).Error
-	return err
+func (repo *Account) Update(account *domain.Account) error {
+	result := repo.db.Where("id = ?", account.ID).Updates(account)
+	if result.Error != nil {
+		log.Println("Error updating account:", result.Error)
+		return result.Error
+	}
+	return nil
 }
 
 func (repo *Account) Delete(id int64) error {

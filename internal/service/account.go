@@ -24,13 +24,16 @@ func (s *AccountService) CreateAccount(input CreateAccountInput) error {
 		Currency:  input.Currency,
 		CreatedAt: time.Now(),
 	}
-	err := s.repo.Create(account)
+	_, err := s.repo.Create(account)
 	return err
 }
 
-func (s *AccountService) GetAccount(id int64) (domain.Account, error) {
+func (s *AccountService) GetAccount(id int64) (*domain.Account, error) {
 	acc, err := s.repo.GetAccount(id)
-	return *acc, err
+	if err != nil {
+		return nil, err
+	}
+	return acc, nil
 }
 
 func (s *AccountService) GetAllAccounts() ([]domain.Account, error) {
@@ -46,7 +49,7 @@ func (s *AccountService) UpdateAccount(input UpdateAccountInput) error {
 		Currency:  input.Currency,
 		CreatedAt: time.Now(),
 	}
-	err := s.repo.Update(account)
+	err := s.repo.Update(&account)
 
 	return err
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/AZRV17/goWEB/internal/service"
 )
@@ -25,11 +26,19 @@ func (h *Handler) Init(mux *http.ServeMux) {
 func (h *Handler) v1() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		m, err := h.service.AccountService.GetAccount(1)
+
+		acc := service.CreateAccountInput{
+			Owner:     "John Doe",
+			Balance:   100,
+			Currency:  "USD",
+			CreatedAt: time.Now(),
+		}
+
+		err := h.service.AccountService.CreateAccount(acc)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		json.NewEncoder(w).Encode(m)
+		json.NewEncoder(w).Encode("status:success")
 	})
 }

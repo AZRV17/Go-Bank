@@ -6,6 +6,8 @@ import (
 	"github.com/AZRV17/goWEB/internal/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type CreateAccountInput struct {
 	Owner     string
 	Balance   int64

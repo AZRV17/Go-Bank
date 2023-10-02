@@ -1,132 +1,330 @@
 package repository_test
 
 import (
-	"regexp"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/AZRV17/goWEB/internal/domain"
-	"github.com/AZRV17/goWEB/internal/repository"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	mock_repository "github.com/AZRV17/goWEB/internal/repository/mocks"
+	"github.com/golang/mock/gomock"
 )
 
-func createMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock, repository.Account) {
-	mockDb, mock, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("failed to create mock db: %v", err)
+func TestAccount_Create(t *testing.T) {
+	type fields struct {
+		repo *mock_repository.MockAccounts
 	}
-	dialector := postgres.New(postgres.Config{
-		DriverName:           "postgres",
-		Conn:                 mockDb,
-		PreferSimpleProtocol: true,
-	})
-	db, err := gorm.Open(dialector, &gorm.Config{})
-	if err != nil {
-		t.Fatalf("failed to open gorm connection: %v", err)
+	type args struct {
+		account domain.Account
 	}
-
-	r := repository.NewRepositories(db)
-	repo := r.Account
-
-	return db, mock, repo
-}
-
-func TestCreateAccount(t *testing.T) {
-	db, mock, repo := createMockDB(t)
-	defer func() {
-		Db, _ := db.DB()
-		Db.Close()
-	}()
-
-	account := domain.Account{
-		Owner:     "Alexa",
-		Balance:   1000,
-		Currency:  "RUB",
-		CreatedAt: time.Now(),
+	tests := []struct {
+		name    string
+		prepare func(f *fields)
+		args    args
+		want    *domain.Account
+		wantErr bool
+	}{
+		{
+			name: "success",
+			prepare: func(f *fields) {
+				f.repo.EXPECT().Create(domain.Account{
+					ID:        1,
+					Owner:     "Alexa",
+					Balance:   1000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				}).Return(&domain.Account{
+					ID:        1,
+					Owner:     "Alexa",
+					Balance:   1000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				}, nil)
+			},
+			args: args{
+				account: domain.Account{
+					ID:        1,
+					Owner:     "Alexa",
+					Balance:   1000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			want: &domain.Account{
+				ID:        1,
+				Owner:     "Alexa",
+				Balance:   1000,
+				Currency:  "RUB",
+				CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			},
+			wantErr: false,
+		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	rows := sqlmock.NewRows([]string{"id", "owner", "balance", "currency", "created_at"}).AddRow(1, "Alexa", 1000, "RUB", time.Now())
+			f := fields{
+				repo: mock_repository.NewMockAccounts(ctrl),
+			}
 
-	mock.ExpectBegin()
-	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "accounts" ("owner","balance","currency","created_at") VALUES ($1,$2,$3,$4) RETURNING "id"`)).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1)).WithArgs(account.Owner, account.Balance, account.Currency, account.CreatedAt)
-	mock.ExpectCommit()
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "accounts" ORDER BY "accounts"."id" DESC LIMIT 1`)).
-		WillReturnRows(rows)
+			if tt.prepare != nil {
+				tt.prepare(&f)
+			}
 
-	_, err := repo.Create(account)
-	assert.NoError(t, err)
+			account, err := f.repo.Create(tt.args.account)
+
+			if err != nil {
+				t.Errorf("AccountService.CreateAccount() error = %v", err)
+			}
+
+			if account.ID != tt.want.ID {
+				t.Errorf("AccountService.CreateAccount() = %v, want %v", account, tt.want)
+			}
+		})
+	}
 }
 
-func TestGetAccount(t *testing.T) {
-	db, mock, repo := createMockDB(t)
-	defer func() {
-		Db, _ := db.DB()
-		Db.Close()
-	}()
+func TestAccount_GetAccount(t *testing.T) {
+	type fields struct {
+		repo *mock_repository.MockAccounts
+	}
+	type args struct {
+		id int64
+	}
+	tests := []struct {
+		name    string
+		prepare func(f *fields)
+		args    args
+		want    *domain.Account
+		wantErr bool
+	}{
+		{
+			name: "success",
+			prepare: func(f *fields) {
+				f.repo.EXPECT().GetAccount(int64(1)).Return(&domain.Account{
+					ID:        1,
+					Owner:     "Alexa",
+					Balance:   1000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				}, nil)
+			},
+			args: args{
+				id: 1,
+			},
+			want: &domain.Account{
+				ID:        1,
+				Owner:     "Alexa",
+				Balance:   1000,
+				Currency:  "RUB",
+				CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	rows := sqlmock.NewRows([]string{"id", "owner", "balance", "currency", "created_at"}).AddRow(1, "Alexa", 1000, "RUB", time.Now())
+			f := fields{
+				repo: mock_repository.NewMockAccounts(ctrl),
+			}
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "accounts" WHERE "accounts"."id" = $1 ORDER BY "accounts"."id" LIMIT 1`)).
-		WillReturnRows(rows).WithArgs(1)
+			if tt.prepare != nil {
+				tt.prepare(&f)
+			}
 
-	_, err := repo.GetAccount(1)
-	assert.NoError(t, err)
+			account, err := f.repo.GetAccount(tt.args.id)
+
+			if err != nil {
+				t.Errorf("AccountService.GetAccount() error = %v", err)
+			}
+
+			if account.ID != tt.want.ID {
+				t.Errorf("AccountService.GetAccount() = %v, want %v", account, tt.want)
+			}
+		})
+	}
 }
 
-func TestGetAllAccounts(t *testing.T) {
-	db, mock, repo := createMockDB(t)
-	defer func() {
-		Db, _ := db.DB()
-		Db.Close()
-	}()
+func TestAccount_Update(t *testing.T) {
+	type fields struct {
+		repo *mock_repository.MockAccounts
+	}
+	type args struct {
+		account *domain.Account
+	}
+	tests := []struct {
+		name    string
+		prepare func(f *fields)
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "success",
+			prepare: func(f *fields) {
+				f.repo.EXPECT().Update(&domain.Account{
+					ID:        1,
+					Owner:     "Alexa",
+					Balance:   1000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				}).Return(nil)
+			},
+			args: args{
+				account: &domain.Account{
+					ID:        1,
+					Owner:     "Alexa",
+					Balance:   1000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	rows := sqlmock.NewRows([]string{"id", "owner", "balance", "currency", "created_at"}).AddRow(1, "Alexa", 1000, "RUB", time.Now()).
-		AddRow(2, "Bob", 2000, "RUB", time.Now())
+			f := fields{
+				repo: mock_repository.NewMockAccounts(ctrl),
+			}
 
-	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "accounts"`)).WillReturnRows(rows)
+			if tt.prepare != nil {
+				tt.prepare(&f)
+			}
 
-	_, err := repo.GetAllAccounts()
-	assert.NoError(t, err)
+			err := f.repo.Update(tt.args.account)
+
+			if err != nil {
+				t.Errorf("AccountService.UpdateAccount() error = %v", err)
+			}
+		})
+	}
 }
 
-func TestDeleteAccount(t *testing.T) {
-	db, mock, repo := createMockDB(t)
-	defer func() {
-		Db, _ := db.DB()
-		Db.Close()
-	}()
+func TestAccount_Delete(t *testing.T) {
+	type fields struct {
+		repo *mock_repository.MockAccounts
+	}
+	type args struct {
+		id int64
+	}
+	tests := []struct {
+		name    string
+		prepare func(f *fields)
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "success",
+			prepare: func(f *fields) {
+				f.repo.EXPECT().Delete(int64(1)).Return(nil)
+			},
+			args: args{
+				id: 1,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`DELETE FROM "accounts" WHERE "accounts"."id" = $1`)).WithArgs(1).WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectCommit()
+			f := fields{
+				repo: mock_repository.NewMockAccounts(ctrl),
+			}
 
-	err := repo.Delete(1)
-	assert.NoError(t, err)
+			if tt.prepare != nil {
+				tt.prepare(&f)
+			}
+
+			err := f.repo.Delete(tt.args.id)
+
+			if err != nil {
+				t.Errorf("AccountService.DeleteAccount() error = %v", err)
+			}
+		})
+	}
 }
 
-func TestUpdateAccount(t *testing.T) {
-	db, mock, repo := createMockDB(t)
-	defer func() {
-		Db, _ := db.DB()
-		Db.Close()
-	}()
+func TestAccount_GetAll(t *testing.T) {
+	type fields struct {
+		repo *mock_repository.MockAccounts
+	}
+	tests := []struct {
+		name    string
+		prepare func(f *fields)
+		want    []domain.Account
+		wantErr bool
+	}{
+		{
+			name: "success",
+			prepare: func(f *fields) {
+				f.repo.EXPECT().GetAll().Return([]domain.Account{
+					{
+						ID:        1,
+						Owner:     "Alexa",
+						Balance:   1000,
+						Currency:  "RUB",
+						CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+					},
+					{
+						ID:        2,
+						Owner:     "Bob",
+						Balance:   2000,
+						Currency:  "RUB",
+						CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+					},
+				}, nil)
+			},
+			want: []domain.Account{
+				{
+					ID:        1,
+					Owner:     "Alexa",
+					Balance:   1000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					ID:        2,
+					Owner:     "Bob",
+					Balance:   2000,
+					Currency:  "RUB",
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta(`UPDATE "accounts" SET "id"=$1,"owner"=$2,"balance"=$3,"currency"=$4,"created_at"=$5 WHERE id = $6`)).
-		WithArgs(1, "Alexa", 2000, "RUB", time.Now(), 1).WillReturnResult(sqlmock.NewResult(1, 1))
-	mock.ExpectCommit()
+			f := fields{
+				repo: mock_repository.NewMockAccounts(ctrl),
+			}
 
-	err := repo.Update(&domain.Account{
-		ID:        1,
-		Owner:     "Alexa",
-		Balance:   2000,
-		Currency:  "RUB",
-		CreatedAt: time.Now(),
-	})
+			if tt.prepare != nil {
+				tt.prepare(&f)
+			}
 
-	assert.NoError(t, err)
+			got, err := f.repo.GetAll()
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("AccountService.GetAll() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AccountService.GetAll() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

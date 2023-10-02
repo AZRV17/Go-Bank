@@ -39,7 +39,7 @@ func (repo *Account) GetAccount(id int64) (*domain.Account, error) {
 }
 
 func (repo *Account) Update(account *domain.Account) error {
-	result := repo.db.Where("id = ?", account.ID).Updates(account)
+	result := repo.db.Save(account)
 	if result.Error != nil {
 		log.Println("Error updating account:", result.Error)
 		return result.Error
@@ -52,7 +52,7 @@ func (repo *Account) Delete(id int64) error {
 	return err
 }
 
-func (repo *Account) GetAllAccounts() ([]domain.Account, error) {
+func (repo *Account) GetAll() ([]domain.Account, error) {
 	var accounts []domain.Account
 
 	err := repo.db.Find(&accounts).Error

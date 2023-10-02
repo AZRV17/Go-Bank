@@ -37,7 +37,7 @@ func (s *AccountService) GetAccount(id int64) (*domain.Account, error) {
 }
 
 func (s *AccountService) GetAllAccounts() ([]domain.Account, error) {
-	accs, err := s.repo.GetAllAccounts()
+	accs, err := s.repo.GetAll()
 	return accs, err
 }
 

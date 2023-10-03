@@ -11,7 +11,7 @@ type TransferService struct {
 	repo repository.Transfers
 }
 
-func NewTransferService(repo repository.Transfers) Transfer {
+func NewTransferService(repo repository.Transfers) *TransferService {
 	return &TransferService{
 		repo: repo,
 	}

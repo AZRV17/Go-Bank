@@ -11,7 +11,7 @@ type EntryService struct {
 	repo repository.Entries
 }
 
-func NewEntryService(repo repository.Entries) Entry {
+func NewEntryService(repo repository.Entries) *EntryService {
 	return &EntryService{
 		repo: repo,
 	}

@@ -9,7 +9,7 @@ type Entry struct {
 	db *gorm.DB
 }
 
-func NewEntryRepo(db *gorm.DB) Entries {
+func NewEntryRepo(db *gorm.DB) *Entry {
 	return &Entry{db: db.Model(&domain.Entry{})}
 }
 

@@ -9,7 +9,7 @@ type Transfer struct {
 	db *gorm.DB
 }
 
-func NewTransferRepo(db *gorm.DB) Transfers {
+func NewTransferRepo(db *gorm.DB) *Transfer {
 	return &Transfer{db: db.Model(domain.Transfer{})}
 }
 

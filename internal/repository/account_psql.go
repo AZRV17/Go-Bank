@@ -11,7 +11,7 @@ type Account struct {
 	db *gorm.DB
 }
 
-func NewAccountRepo(db *gorm.DB) Accounts {
+func NewAccountRepo(db *gorm.DB) *Account {
 	return &Account{db: db.Model(&domain.Account{})}
 }
 

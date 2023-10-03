@@ -11,7 +11,7 @@ type AccountService struct {
 	repo repository.Accounts
 }
 
-func NewAccountService(repo repository.Accounts) Account {
+func NewAccountService(repo repository.Accounts) *AccountService {
 	return &AccountService{
 		repo: repo,
 	}

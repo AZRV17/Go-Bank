@@ -1,9 +1,14 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/AZRV17/goWEB/internal/config"
 	handler "github.com/AZRV17/goWEB/internal/controller/http"
@@ -26,15 +31,6 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	defer func() {
-		db, err := psql.DB.DB()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		log.Fatal(db.Close())
-	}()
-
 	mux := http.NewServeMux()
 
 	repository := repository.NewRepository(psql.DB)
@@ -42,7 +38,36 @@ func Run() {
 	handler := handler.NewHandler(*service)
 
 	handler.Init(mux)
+	srv := &http.Server{
+		Addr:    config.Server.Host + ":" + config.Server.Port,
+		Handler: mux,
+	}
 
-	log.Println("Server started on port " + config.Server.Port)
-	log.Fatal(http.ListenAndServe(config.Server.Host+":"+config.Server.Port, mux))
+	// listen to OS signals and gracefully shutdown HTTP server
+	stopped := make(chan struct{})
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+		<-sigint
+		log.Printf("got interruption signal")
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Printf("HTTP Server Shutdown Error: %v", err)
+		}
+		close(stopped)
+	}()
+
+	log.Printf("Starting HTTP server on %s", config.Server.Host+":"+config.Server.Port)
+
+	// start HTTP server
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatalf("HTTP server ListenAndServe Error: %v", err)
+	}
+
+	<-stopped
+
+	psql.Close()
+
+	log.Printf("server is shutting down")
 }

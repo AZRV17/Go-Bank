@@ -1,6 +1,8 @@
 package psql
 
 import (
+	"log"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -16,4 +18,20 @@ func Connect(dsn string) error {
 	}
 
 	return nil
+}
+
+func Close() {
+	db, err := DB.DB()
+	if err != nil {
+		log.Fatal("error getting db", err)
+	}
+
+	log.Println("closing db")
+
+	err = db.Close()
+	if err != nil {
+		log.Fatal("error closing db: ", err)
+	}
+
+	log.Println("db closed")
 }

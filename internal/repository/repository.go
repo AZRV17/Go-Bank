@@ -31,14 +31,14 @@ type Transfers interface {
 	GetAll() ([]domain.Transfer, error)
 }
 
-type Repositories struct {
+type Repository struct {
 	Account  Accounts
 	Entry    Entries
 	Transfer Transfers
 }
 
-func NewRepositories(db *gorm.DB) *Repositories {
-	return &Repositories{
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{
 		Account:  NewAccountRepo(db),
 		Entry:    NewEntryRepo(db),
 		Transfer: NewTransferRepo(db),

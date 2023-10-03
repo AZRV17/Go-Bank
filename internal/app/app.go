@@ -37,8 +37,8 @@ func Run() {
 
 	mux := http.NewServeMux()
 
-	repositories := repository.NewRepositories(psql.DB)
-	service := service.NewService(repositories)
+	repository := repository.NewRepository(psql.DB)
+	service := service.NewService(repository)
 	handler := handler.NewHandler(*service)
 
 	handler.Init(mux)

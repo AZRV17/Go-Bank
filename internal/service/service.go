@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 
+	"github.com/AZRV17/goWEB/internal/domain"
 	"github.com/AZRV17/goWEB/internal/repository"
 )
 
@@ -24,11 +25,11 @@ type UpdateAccountInput struct {
 }
 
 type Account interface {
-	CreateAccount(input CreateAccountInput) (int64, error)
+	CreateAccount(input CreateAccountInput) error
 	UpdateAccount(input UpdateAccountInput) error
 	DeleteAccount(id int64) error
-	GetAccount(id int64) (repository.Account, error)
-	GetAllAccounts() ([]repository.Account, error)
+	GetAccount(id int64) (*domain.Account, error)
+	GetAllAccounts() ([]domain.Account, error)
 }
 
 type CreateEntryInput struct {
@@ -45,11 +46,11 @@ type UpdateEntryInput struct {
 }
 
 type Entry interface {
-	CreateEntry(input CreateEntryInput) (int64, error)
+	CreateEntry(input CreateEntryInput) error
 	UpdateEntry(input UpdateEntryInput) error
 	DeleteEntry(id int64) error
-	GetEntry(id int64) (repository.Entry, error)
-	GetAllEntries() ([]repository.Entry, error)
+	GetEntry(id int64) (*domain.Entry, error)
+	GetAllEntries() ([]domain.Entry, error)
 }
 
 type CreateTransferInput struct {
@@ -67,22 +68,22 @@ type UpdateTransferInput struct {
 	CreatedAt     time.Time
 }
 
-type TransferServiceInterface interface {
-	CreateTransfer(input CreateTransferInput) (int64, error)
+type Transfer interface {
+	CreateTransfer(input CreateTransferInput) error
 	UpdateTransfer(input UpdateTransferInput) error
 	DeleteTransfer(id int64) error
-	GetTransfer(id int64) (repository.Transfer, error)
-	GetAllTransfers() ([]repository.Transfer, error)
+	GetTransfer(id int64) (*domain.Transfer, error)
+	GetAllTransfers() ([]domain.Transfer, error)
 }
 
 type Service struct {
-	AccountService  *AccountService
-	EntryService    *EntryService
-	TransferService *TransferService
-	repo            *repository.Repositories
+	AccountService  Account
+	EntryService    Entry
+	TransferService Transfer
+	repo            *repository.Repository
 }
 
-func NewService(repo *repository.Repositories) *Service {
+func NewService(repo *repository.Repository) *Service {
 	return &Service{
 		repo:            repo,
 		AccountService:  NewAccountService(repo.Account),

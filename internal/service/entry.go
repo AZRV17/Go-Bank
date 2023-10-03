@@ -11,7 +11,7 @@ type EntryService struct {
 	repo repository.Entries
 }
 
-func NewEntryService(repo repository.Entries) *EntryService {
+func NewEntryService(repo repository.Entries) Entry {
 	return &EntryService{
 		repo: repo,
 	}
@@ -27,9 +27,9 @@ func (s *EntryService) CreateEntry(input CreateEntryInput) error {
 	return err
 }
 
-func (s *EntryService) GetEntry(id int64) (domain.Entry, error) {
+func (s *EntryService) GetEntry(id int64) (*domain.Entry, error) {
 	entry, err := s.repo.GetEntry(id)
-	return *entry, err
+	return entry, err
 }
 
 func (s *EntryService) GetAllEntries() ([]domain.Entry, error) {

@@ -11,7 +11,7 @@ type TransferService struct {
 	repo repository.Transfers
 }
 
-func NewTransferService(repo repository.Transfers) *TransferService {
+func NewTransferService(repo repository.Transfers) Transfer {
 	return &TransferService{
 		repo: repo,
 	}
@@ -28,9 +28,9 @@ func (s *TransferService) CreateTransfer(input CreateTransferInput) error {
 	return err
 }
 
-func (s *TransferService) GetTransfer(id int64) (domain.Transfer, error) {
+func (s *TransferService) GetTransfer(id int64) (*domain.Transfer, error) {
 	transfer, err := s.repo.GetTransfer(id)
-	return *transfer, err
+	return transfer, err
 }
 
 func (s *TransferService) GetAllTransfers() ([]domain.Transfer, error) {

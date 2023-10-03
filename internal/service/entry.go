@@ -8,10 +8,10 @@ import (
 )
 
 type EntryService struct {
-	repo repository.Entry
+	repo repository.Entries
 }
 
-func NewEntryService(repo repository.Entry) *EntryService {
+func NewEntryService(repo repository.Entries) *EntryService {
 	return &EntryService{
 		repo: repo,
 	}
@@ -23,11 +23,11 @@ func (s *EntryService) CreateEntry(input CreateEntryInput) error {
 		Amount:    input.Amount,
 		CreatedAt: time.Now(),
 	}
-	err := s.repo.Create(entry)
+	_, err := s.repo.Create(entry)
 	return err
 }
 
-func (s *EntryService) GetEntry(id int) (domain.Entry, error) {
+func (s *EntryService) GetEntry(id int64) (domain.Entry, error) {
 	entry, err := s.repo.GetEntry(id)
 	return *entry, err
 }
@@ -49,7 +49,7 @@ func (s *EntryService) UpdateEntry(input UpdateEntryInput) error {
 	return err
 }
 
-func (s *EntryService) DeleteEntry(id int) error {
+func (s *EntryService) DeleteEntry(id int64) error {
 	err := s.repo.Delete(id)
 	return err
 }

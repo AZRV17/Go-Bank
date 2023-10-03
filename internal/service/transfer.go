@@ -8,10 +8,10 @@ import (
 )
 
 type TransferService struct {
-	repo repository.Transfer
+	repo repository.Transfers
 }
 
-func NewTransferService(repo repository.Transfer) *TransferService {
+func NewTransferService(repo repository.Transfers) *TransferService {
 	return &TransferService{
 		repo: repo,
 	}
@@ -24,11 +24,11 @@ func (s *TransferService) CreateTransfer(input CreateTransferInput) error {
 		Amount:        input.Amount,
 		CreatedAt:     time.Now(),
 	}
-	err := s.repo.Create(transfer)
+	_, err := s.repo.Create(transfer)
 	return err
 }
 
-func (s *TransferService) GetTransfer(id int) (domain.Transfer, error) {
+func (s *TransferService) GetTransfer(id int64) (domain.Transfer, error) {
 	transfer, err := s.repo.GetTransfer(id)
 	return *transfer, err
 }
@@ -51,7 +51,7 @@ func (s *TransferService) UpdateTransfer(input UpdateTransferInput) error {
 	return err
 }
 
-func (s *TransferService) DeleteTransfer(id int) error {
+func (s *TransferService) DeleteTransfer(id int64) error {
 	err := s.repo.Delete(id)
 	return err
 }

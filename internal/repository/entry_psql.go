@@ -9,8 +9,8 @@ type Entry struct {
 	db *gorm.DB
 }
 
-func NewEntryRepo(db *gorm.DB) *Entry {
-	return &Entry{db: db.Model(&Entry{})}
+func NewEntryRepo(db *gorm.DB) Entries {
+	return &Entry{db: db.Model(&domain.Entry{})}
 }
 
 func (repo *Entry) GetAll() ([]domain.Entry, error) {
@@ -23,7 +23,7 @@ func (repo *Entry) GetAll() ([]domain.Entry, error) {
 	return entries, nil
 }
 
-func (repo *Entry) GetEntry(id int) (*domain.Entry, error) {
+func (repo *Entry) GetEntry(id int64) (*domain.Entry, error) {
 	var entry domain.Entry
 	err := repo.db.First(&entry, id).Error
 	if err != nil {
@@ -33,9 +33,14 @@ func (repo *Entry) GetEntry(id int) (*domain.Entry, error) {
 	return &entry, nil
 }
 
-func (repo *Entry) Create(entry domain.Entry) error {
+func (repo *Entry) Create(entry domain.Entry) (*domain.Entry, error) {
 	err := repo.db.Create(&entry).Error
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	repo.db.Last(entry)
+	return &entry, err
 }
 
 func (repo *Entry) Update(entry domain.Entry) error {
@@ -43,7 +48,7 @@ func (repo *Entry) Update(entry domain.Entry) error {
 	return err
 }
 
-func (repo *Entry) Delete(id int) error {
+func (repo *Entry) Delete(id int64) error {
 	err := repo.db.Delete(&domain.Entry{}, id).Error
 	return err
 }

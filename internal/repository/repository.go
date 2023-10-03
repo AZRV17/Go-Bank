@@ -32,15 +32,15 @@ type Transfers interface {
 }
 
 type Repositories struct {
-	Account  Account
-	Entry    Entry
-	Transfer Transfer
+	Account  Accounts
+	Entry    Entries
+	Transfer Transfers
 }
 
 func NewRepositories(db *gorm.DB) *Repositories {
 	return &Repositories{
-		Account:  *NewAccountRepo(db),
-		Entry:    *NewEntryRepo(db),
-		Transfer: *NewTransferRepo(db),
+		Account:  NewAccountRepo(db),
+		Entry:    NewEntryRepo(db),
+		Transfer: NewTransferRepo(db),
 	}
 }

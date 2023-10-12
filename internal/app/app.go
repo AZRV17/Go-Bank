@@ -31,6 +31,8 @@ func Run() {
 		log.Fatal(err)
 	}
 
+	defer psql.Close()
+
 	mux := http.NewServeMux()
 
 	repository := repository.NewRepository(psql.DB)
@@ -39,7 +41,7 @@ func Run() {
 
 	handler.Init(mux)
 	srv := &http.Server{
-		Addr:    config.Server.Host + ":" + config.Server.Port,
+		Addr:    ":" + config.Server.Port,
 		Handler: mux,
 	}
 
@@ -58,7 +60,7 @@ func Run() {
 		close(stopped)
 	}()
 
-	log.Printf("Starting HTTP server on %s", config.Server.Host+":"+config.Server.Port)
+	log.Printf("Starting HTTP server on %s", ":"+config.Server.Port)
 
 	// start HTTP server
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
@@ -66,8 +68,6 @@ func Run() {
 	}
 
 	<-stopped
-
-	psql.Close()
 
 	log.Printf("server is shutting down")
 }

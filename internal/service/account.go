@@ -18,13 +18,13 @@ func NewAccountService(repo repository.Accounts) *AccountService {
 }
 
 func (s *AccountService) CreateAccount(input CreateAccountInput) error {
-	account := domain.Account{
+	acc := domain.Account{
 		Owner:     input.Owner,
 		Balance:   input.Balance,
 		Currency:  input.Currency,
 		CreatedAt: time.Now(),
 	}
-	_, err := s.repo.Create(account)
+	_, err := s.repo.Create(acc)
 	return err
 }
 
@@ -37,19 +37,19 @@ func (s *AccountService) GetAccount(id int64) (*domain.Account, error) {
 }
 
 func (s *AccountService) GetAllAccounts() ([]domain.Account, error) {
-	accs, err := s.repo.GetAll()
-	return accs, err
+	acc, err := s.repo.GetAll()
+	return acc, err
 }
 
 func (s *AccountService) UpdateAccount(input UpdateAccountInput) error {
-	account := domain.Account{
+	acc := domain.Account{
 		ID:        input.ID,
 		Owner:     input.Owner,
 		Balance:   input.Balance,
 		Currency:  input.Currency,
 		CreatedAt: time.Now(),
 	}
-	err := s.repo.Update(&account)
+	err := s.repo.Update(&acc)
 
 	return err
 }

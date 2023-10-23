@@ -3,14 +3,19 @@ module github.com/AZRV17/goWEB
 go 1.21
 
 require (
+	github.com/go-chi/chi/v5 v5.0.10
 	github.com/golang/mock v1.6.0
 	gorm.io/driver/postgres v1.5.2
 )
 
-require github.com/stretchr/testify v1.8.4 // indirect
+require (
+	github.com/ajg/form v1.5.1 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/go-chi/render v1.0.3
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
@@ -26,9 +31,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.16.0
 	github.com/subosito/gotenv v1.4.2 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/gorm v1.25.4

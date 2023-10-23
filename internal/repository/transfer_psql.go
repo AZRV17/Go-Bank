@@ -14,41 +14,70 @@ func NewTransferRepo(db *gorm.DB) *Transfer {
 }
 
 func (repo *Transfer) GetAll() ([]domain.Transfer, error) {
+	tx := repo.db.Begin()
+	defer tx.Rollback()
+
 	var transfers []domain.Transfer
-	err := repo.db.Find(&transfers).Error
+	err := tx.Find(&transfers).Error
 	if err != nil {
 		return nil, err
 	}
 
+	tx.Commit()
 	return transfers, nil
 }
 
 func (repo *Transfer) GetTransfer(id int64) (*domain.Transfer, error) {
+	tx := repo.db.Begin()
+
 	var transfer domain.Transfer
-	err := repo.db.First(&transfer, id).Error
-	if err != nil {
+	if err := tx.First(&transfer, id).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
+
+	tx.Commit()
 
 	return &transfer, nil
 }
 
 func (repo *Transfer) Create(transfer domain.Transfer) (*domain.Transfer, error) {
-	err := repo.db.Create(&transfer).Error
-	if err != nil {
+
+	tx := repo.db.Begin()
+
+	if err := tx.Create(&transfer).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
+
+	tx.Commit()
 
 	repo.db.Last(transfer)
 	return &transfer, nil
 }
 
 func (repo *Transfer) Update(transfer domain.Transfer) error {
-	err := repo.db.Save(&transfer).Error
-	return err
+	tx := repo.db.Begin()
+
+	if err := tx.Where("id = ?", transfer.ID).Save(&transfer).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
 }
 
 func (repo *Transfer) Delete(id int64) error {
-	err := repo.db.Delete(&domain.Transfer{}, id).Error
-	return err
+	tx := repo.db.Begin()
+
+	if err := tx.Delete(&domain.Transfer{}, id).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
 }

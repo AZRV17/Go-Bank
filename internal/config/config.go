@@ -31,11 +31,11 @@ func NewConfig(configPath string) (*Config, error) {
 
 	config.Server.Host = viper.GetString("http.host")
 	config.Server.Port = viper.GetString("http.port")
-	config.Postgres.Host = viper.GetString("postgres.host")
-	config.Postgres.Port = viper.GetString("postgres.port")
-	config.Postgres.User = viper.GetString("postgres.user")
-	config.Postgres.Password = viper.GetString("postgres.password")
-	config.Postgres.Db = viper.GetString("postgres.db")
+	config.Postgres.Host = viper.GetString("postgres-dev.host")
+	config.Postgres.Port = viper.GetString("postgres-dev.port")
+	config.Postgres.User = viper.GetString("postgres-dev.user")
+	config.Postgres.Password = viper.GetString("postgres-dev.password")
+	config.Postgres.Db = viper.GetString("postgres-dev.db")
 
 	return config, nil
 }

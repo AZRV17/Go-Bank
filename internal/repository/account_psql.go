@@ -1,8 +1,7 @@
 package repository
 
 import (
-	"log"
-
+	"fmt"
 	"github.com/AZRV17/goWEB/internal/domain"
 	"gorm.io/gorm"
 )
@@ -16,49 +15,71 @@ func NewAccountRepo(db *gorm.DB) *Account {
 }
 
 func (repo *Account) Create(account domain.Account) (*domain.Account, error) {
-	err := repo.db.Create(&account).Error
-	if err != nil {
+	tx := repo.db.Begin()
+
+	if err := tx.Create(&account).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
-	var acc domain.Account
+	tx.Commit()
 
+	var acc domain.Account
 	repo.db.Last(&acc)
 
 	return &acc, nil
 }
 
 func (repo *Account) GetAccount(id int64) (*domain.Account, error) {
-	var account domain.Account
-	err := repo.db.First(&account, id).Error
-	if err != nil {
+	var acc domain.Account
+	tx := repo.db.Begin()
+
+	if err := tx.First(&acc, id).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
-	return &account, nil
+	tx.Commit()
+
+	return &acc, nil
 }
 
-func (repo *Account) Update(account *domain.Account) error {
-	result := repo.db.Save(account)
-	if result.Error != nil {
-		log.Println("Error updating account:", result.Error)
-		return result.Error
+func (repo *Account) Update(acc *domain.Account) error {
+	tx := repo.db.Begin()
+
+	if err := tx.Where("id = ?", acc.ID).Save(acc).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("error updating account: %w", err)
 	}
+
+	tx.Commit()
+
 	return nil
 }
 
 func (repo *Account) Delete(id int64) error {
-	err := repo.db.Delete(&domain.Account{}, id).Error
-	return err
+	tx := repo.db.Begin()
+
+	if err := tx.Delete(&domain.Account{}, id).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
 }
 
 func (repo *Account) GetAll() ([]domain.Account, error) {
-	var accounts []domain.Account
+	tx := repo.db.Begin()
 
-	err := repo.db.Find(&accounts).Error
+	var accs []domain.Account
+	err := tx.Find(&accs).Error
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
-	return accounts, nil
+	tx.Commit()
+	return accs, nil
 }

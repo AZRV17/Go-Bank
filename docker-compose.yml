@@ -23,6 +23,8 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
     restart: on-failure:3
+    ports:
+      - 5431:5432
 
   migrate:
     image: migrate/migrate

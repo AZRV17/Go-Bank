@@ -29,7 +29,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 					Owner:     "Alexa",
 					Balance:   1000,
 					Currency:  "RUB",
-					CreatedAt: time.Now(),
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 				}).Return(int64(1), nil)
 			},
 			args: args{
@@ -37,7 +37,7 @@ func TestAccountService_CreateAccount(t *testing.T) {
 					Owner:     "Alexa",
 					Balance:   1000,
 					Currency:  "RUB",
-					CreatedAt: time.Now(),
+					CreatedAt: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 				},
 			},
 			wantErr: false,

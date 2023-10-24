@@ -52,32 +52,6 @@ func (repo *Transfer) Create(transfer domain.Transfer) (*domain.Transfer, error)
 
 	tx.Commit()
 
-	repo.db.Last(transfer)
+	//repo.db.Last(transfer)
 	return &transfer, nil
-}
-
-func (repo *Transfer) Update(transfer domain.Transfer) error {
-	tx := repo.db.Begin()
-
-	if err := tx.Where("id = ?", transfer.ID).Save(&transfer).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	tx.Commit()
-
-	return nil
-}
-
-func (repo *Transfer) Delete(id int64) error {
-	tx := repo.db.Begin()
-
-	if err := tx.Delete(&domain.Transfer{}, id).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	tx.Commit()
-
-	return nil
 }

@@ -83,3 +83,15 @@ func (repo *Account) GetAll() ([]domain.Account, error) {
 	tx.Commit()
 	return accs, nil
 }
+
+func (repo *Account) AddAccountBalance(accID int64, amount int64) error {
+	tx := repo.db.Begin()
+
+	if err := tx.Where("id = ?", accID).Update("balance", gorm.Expr("balance + ?", amount)).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+	return nil
+}

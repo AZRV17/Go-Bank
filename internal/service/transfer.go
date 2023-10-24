@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"time"
 
 	"github.com/AZRV17/goWEB/internal/domain"
@@ -8,12 +9,14 @@ import (
 )
 
 type TransferService struct {
-	repo repository.Transfers
+	repo    repository.Transfers
+	accRepo repository.Accounts
 }
 
-func NewTransferService(repo repository.Transfers) *TransferService {
+func NewTransferService(repo repository.Transfers, accRepo repository.Accounts) *TransferService {
 	return &TransferService{
-		repo: repo,
+		repo:    repo,
+		accRepo: accRepo,
 	}
 }
 
@@ -24,7 +27,14 @@ func (s *TransferService) CreateTransfer(input CreateTransferInput) error {
 		Amount:        input.Amount,
 		CreatedAt:     time.Now(),
 	}
-	_, err := s.repo.Create(transfer)
+
+	if _, err := s.repo.Create(transfer); err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err := s.addMoney(input.FromAccountID, input.ToAccountID, input.Amount)
+
 	return err
 }
 
@@ -38,20 +48,14 @@ func (s *TransferService) GetAllTransfers() ([]domain.Transfer, error) {
 	return transfers, err
 }
 
-func (s *TransferService) UpdateTransfer(input UpdateTransferInput) error {
-	transfer := domain.Transfer{
-		ID:            input.ID,
-		FromAccountID: input.FromAccountID,
-		ToAccountID:   input.ToAccountID,
-		Amount:        input.Amount,
-		CreatedAt:     time.Now(),
+func (s *TransferService) addMoney(fromAccountID, toAccountID int64, amount int64) error {
+	if err := s.accRepo.AddAccountBalance(fromAccountID, -amount); err != nil {
+		return err
 	}
-	err := s.repo.Update(transfer)
 
-	return err
-}
+	if err := s.accRepo.AddAccountBalance(toAccountID, amount); err != nil {
+		return err
+	}
 
-func (s *TransferService) DeleteTransfer(id int64) error {
-	err := s.repo.Delete(id)
-	return err
+	return nil
 }

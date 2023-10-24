@@ -50,20 +50,13 @@ func (h *Handler) getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createAccount(w http.ResponseWriter, r *http.Request) {
-	var body []byte
-	if _, err := r.Body.Read(body); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]interface{}{
-			"message": err.Error(),
-		})
-	}
-
 	var acc service.CreateAccountInput
 	if err := render.DecodeJSON(r.Body, &acc); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	if err := h.service.AccountService.CreateAccount(acc); err != nil {
@@ -71,6 +64,7 @@ func (h *Handler) createAccount(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),
 		})
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

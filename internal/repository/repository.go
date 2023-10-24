@@ -13,6 +13,7 @@ type Accounts interface {
 	Update(account *domain.Account) error
 	Delete(id int64) error
 	GetAll() ([]domain.Account, error)
+	AddAccountBalance(id int64, amount int64) error
 }
 
 type Entries interface {
@@ -26,8 +27,6 @@ type Entries interface {
 type Transfers interface {
 	Create(transfer domain.Transfer) (*domain.Transfer, error)
 	GetTransfer(id int64) (*domain.Transfer, error)
-	Update(transfer domain.Transfer) error
-	Delete(id int64) error
 	GetAll() ([]domain.Transfer, error)
 }
 

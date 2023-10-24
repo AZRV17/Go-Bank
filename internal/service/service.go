@@ -10,18 +10,18 @@ import (
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
 
 type CreateAccountInput struct {
-	Owner     string
-	Balance   int64
-	Currency  string
-	CreatedAt time.Time
+	Owner     string    `json:"owner"`
+	Balance   int64     `json:"balance"`
+	Currency  string    `json:"currency"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type UpdateAccountInput struct {
-	ID        int64
-	Owner     string
-	Balance   int64
-	Currency  string
-	CreatedAt time.Time
+	ID        int64     `json:"id"`
+	Owner     string    `json:"owner"`
+	Balance   int64     `json:"balance"`
+	Currency  string    `json:"currency"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Account interface {
@@ -33,15 +33,15 @@ type Account interface {
 }
 
 type CreateEntryInput struct {
-	AccountID int64
-	Amount    int64
-	CreatedAt time.Time
+	AccountID int64     `json:"account_id"`
+	Amount    int64     `json:"amount"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type UpdateEntryInput struct {
-	ID        int64
-	AccountID int64
-	Amount    int64
+	ID        int64 `json:"id"`
+	AccountID int64 `json:"account_id"`
+	Amount    int64 `json:"amount"`
 	CreatedAt time.Time
 }
 
@@ -54,24 +54,22 @@ type Entry interface {
 }
 
 type CreateTransferInput struct {
-	FromAccountID int64
-	ToAccountID   int64
-	Amount        int64
-	CreatedAt     time.Time
+	FromAccountID int64     `json:"from_account_id"`
+	ToAccountID   int64     `json:"to_account_id"`
+	Amount        int64     `json:"amount"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type UpdateTransferInput struct {
-	ID            int64
-	FromAccountID int64
-	ToAccountID   int64
-	Amount        int64
-	CreatedAt     time.Time
+	ID            int64     `json:"id"`
+	FromAccountID int64     `json:"from_account_id"`
+	ToAccountID   int64     `json:"to_account_id"`
+	Amount        int64     `json:"amount"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Transfer interface {
 	CreateTransfer(input CreateTransferInput) error
-	UpdateTransfer(input UpdateTransferInput) error
-	DeleteTransfer(id int64) error
 	GetTransfer(id int64) (*domain.Transfer, error)
 	GetAllTransfers() ([]domain.Transfer, error)
 }
@@ -88,6 +86,6 @@ func NewService(repo *repository.Repository) *Service {
 		repo:            repo,
 		AccountService:  NewAccountService(repo.Account),
 		EntryService:    NewEntryService(repo.Entry),
-		TransferService: NewTransferService(repo.Transfer),
+		TransferService: NewTransferService(repo.Transfer, repo.Account),
 	}
 }

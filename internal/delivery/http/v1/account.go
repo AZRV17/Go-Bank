@@ -1,14 +1,20 @@
 package v1
 
 import (
-	"log"
-	"net/http"
-	"strconv"
-
 	"github.com/AZRV17/goWEB/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
+	"log"
+	"net/http"
+	"strconv"
 )
+
+type createAccountInput struct {
+	Owner    string `json:"owner" validate:"required"`
+	Balance  int64  `json:"balance" validate:"required,min=0"`
+	Currency string `json:"currency" validate:"required,oneof=USD EUR RUB BYN CNY"`
+}
 
 func (h *Handler) initAccountRoutes(r chi.Router) {
 	r.Route("/account", func(r chi.Router) {
@@ -51,8 +57,8 @@ func (h *Handler) getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createAccount(w http.ResponseWriter, r *http.Request) {
-	var acc service.CreateAccountInput
-	if err := render.DecodeJSON(r.Body, &acc); err != nil {
+	inp := &createAccountInput{}
+	if err := render.DecodeJSON(r.Body, inp); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),
@@ -60,7 +66,20 @@ func (h *Handler) createAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.AccountService.CreateAccount(acc); err != nil {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	if err := validate.Struct(inp); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		render.JSON(w, r, map[string]interface{}{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := h.service.AccountService.CreateAccount(service.CreateAccountInput{
+		Owner:    inp.Owner,
+		Balance:  inp.Balance,
+		Currency: inp.Currency,
+	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),
@@ -75,15 +94,6 @@ func (h *Handler) createAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) updateAccount(w http.ResponseWriter, r *http.Request) {
-	var body []byte
-	if _, err := r.Body.Read(body); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		render.JSON(w, r, map[string]interface{}{
-			"message": err.Error(),
-		})
-		return
-	}
-
 	idParam := chi.URLParam(r, "id")
 
 	id, err := strconv.Atoi(idParam)
@@ -92,10 +102,9 @@ func (h *Handler) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var acc service.UpdateAccountInput
-	acc.ID = int64(id)
+	inp := &createAccountInput{}
 
-	if err := render.DecodeJSON(r.Body, &acc); err != nil {
+	if err := render.DecodeJSON(r.Body, inp); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),
@@ -103,7 +112,21 @@ func (h *Handler) updateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.AccountService.UpdateAccount(acc); err != nil {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	if err := validate.Struct(inp); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		render.JSON(w, r, map[string]interface{}{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := h.service.AccountService.UpdateAccount(service.UpdateAccountInput{
+		ID:       int64(id),
+		Owner:    inp.Owner,
+		Balance:  inp.Balance,
+		Currency: inp.Currency,
+	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),
@@ -114,7 +137,7 @@ func (h *Handler) updateAccount(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	render.JSON(w, r, map[string]interface{}{
 		"message": "account updated successfully",
-		"id":      acc.ID,
+		"id":      id,
 	})
 }
 

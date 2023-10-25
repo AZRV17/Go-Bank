@@ -4,9 +4,16 @@ import (
 	"github.com/AZRV17/goWEB/internal/service"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
 )
+
+type transferInput struct {
+	FromAccountID int64 `json:"from_account_id" validate:"required,min=1"`
+	ToAccountID   int64 `json:"to_account_id" validate:"required,min=1"`
+	Amount        int64 `json:"amount" validate:"required,gt=0"`
+}
 
 func (h *Handler) initTransferRoutes(r chi.Router) {
 	r.Route("/transfer", func(r chi.Router) {
@@ -50,8 +57,8 @@ func (h *Handler) getTransfer(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createTransfer(w http.ResponseWriter, r *http.Request) {
-	var transfer service.CreateTransferInput
-	if err := render.DecodeJSON(r.Body, &transfer); err != nil {
+	inp := &transferInput{}
+	if err := render.DecodeJSON(r.Body, inp); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),
@@ -59,7 +66,20 @@ func (h *Handler) createTransfer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.TransferService.CreateTransfer(transfer); err != nil {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	if err := validate.Struct(inp); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		render.JSON(w, r, map[string]interface{}{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := h.service.TransferService.CreateTransfer(service.CreateTransferInput{
+		FromAccountID: inp.FromAccountID,
+		ToAccountID:   inp.ToAccountID,
+		Amount:        inp.Amount,
+	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		render.JSON(w, r, map[string]interface{}{
 			"message": err.Error(),

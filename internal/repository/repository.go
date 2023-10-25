@@ -19,8 +19,6 @@ type Accounts interface {
 type Entries interface {
 	Create(entry domain.Entry) (*domain.Entry, error)
 	GetEntry(id int64) (*domain.Entry, error)
-	Update(entry domain.Entry) error
-	Delete(id int64) error
 	GetAll() ([]domain.Entry, error)
 }
 

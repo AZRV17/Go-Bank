@@ -14,14 +14,16 @@ import (
 )
 
 type TransferService struct {
-	repo    repository.Transfers
-	accRepo repository.Accounts
+	repo      repository.Transfers
+	accRepo   repository.Accounts
+	entryRepo repository.Entries
 }
 
-func NewTransferService(repo repository.Transfers, accRepo repository.Accounts) *TransferService {
+func NewTransferService(repo repository.Transfers, accRepo repository.Accounts, entryRepo repository.Entries) *TransferService {
 	return &TransferService{
-		repo:    repo,
-		accRepo: accRepo,
+		repo:      repo,
+		accRepo:   accRepo,
+		entryRepo: entryRepo,
 	}
 }
 
@@ -83,6 +85,26 @@ func (s *TransferService) addMoney(fromAccountID, toAccountID int64, amount int6
 		return err
 	}
 
+	entryFrom := CreateEntryInput{
+		AccountID: fromAccountID,
+		Amount:    amount * -1,
+		CreatedAt: time.Now(),
+	}
+
+	entryTo := CreateEntryInput{
+		AccountID: toAccountID,
+		Amount:    amount,
+		CreatedAt: time.Now(),
+	}
+
+	if err := s.createEntry(entryFrom); err != nil {
+		return err
+	}
+
+	if err := s.createEntry(entryTo); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -113,4 +135,14 @@ func calculateAmountByCurrency(amount int64, currencyFrom, currencyTo string) (i
 	}
 
 	return 0, errors.New("invalid currency")
+}
+
+func (s *TransferService) createEntry(input CreateEntryInput) error {
+	entry := domain.Entry{
+		AccountID: input.AccountID,
+		Amount:    input.Amount,
+		CreatedAt: time.Now(),
+	}
+	_, err := s.entryRepo.Create(entry)
+	return err
 }

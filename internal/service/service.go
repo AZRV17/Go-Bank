@@ -46,9 +46,6 @@ type UpdateEntryInput struct {
 }
 
 type Entry interface {
-	CreateEntry(input CreateEntryInput) error
-	UpdateEntry(input UpdateEntryInput) error
-	DeleteEntry(id int64) error
 	GetEntry(id int64) (*domain.Entry, error)
 	GetAllEntries() ([]domain.Entry, error)
 }
@@ -86,6 +83,6 @@ func NewService(repo *repository.Repository) *Service {
 		repo:            repo,
 		AccountService:  NewAccountService(repo.Account),
 		EntryService:    NewEntryService(repo.Entry),
-		TransferService: NewTransferService(repo.Transfer, repo.Account),
+		TransferService: NewTransferService(repo.Transfer, repo.Account, repo.Entry),
 	}
 }

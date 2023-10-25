@@ -55,28 +55,3 @@ func (repo *Entry) Create(entry domain.Entry) (*domain.Entry, error) {
 
 	return &entry, nil
 }
-
-func (repo *Entry) Update(entry domain.Entry) error {
-	tx := repo.db.Begin()
-
-	if err := tx.Where("id = ?", entry.ID).Save(&entry).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	tx.Commit()
-
-	return nil
-}
-
-func (repo *Entry) Delete(id int64) error {
-	tx := repo.db.Begin()
-
-	if err := tx.Delete(&domain.Entry{}, id).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	tx.Commit()
-	return nil
-}

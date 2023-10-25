@@ -27,5 +27,6 @@ func (h *Handler) Init(r chi.Router) {
 	r.Route("/v1", func(r chi.Router) {
 		h.initTransferRoutes(r)
 		h.initAccountRoutes(r)
+		h.initEntryRoutes(r)
 	})
 }

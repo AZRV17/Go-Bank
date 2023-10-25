@@ -7,7 +7,7 @@ package mock_service
 import (
 	reflect "reflect"
 
-	repository "github.com/AZRV17/goWEB/internal/repository"
+	domain "github.com/AZRV17/goWEB/internal/domain"
 	service "github.com/AZRV17/goWEB/internal/service"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -36,12 +36,11 @@ func (m *MockAccount) EXPECT() *MockAccountMockRecorder {
 }
 
 // CreateAccount mocks base method.
-func (m *MockAccount) CreateAccount(input service.CreateAccountInput) (int64, error) {
+func (m *MockAccount) CreateAccount(input service.CreateAccountInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateAccount", input)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // CreateAccount indicates an expected call of CreateAccount.
@@ -65,10 +64,10 @@ func (mr *MockAccountMockRecorder) DeleteAccount(id interface{}) *gomock.Call {
 }
 
 // GetAccount mocks base method.
-func (m *MockAccount) GetAccount(id int64) (repository.Account, error) {
+func (m *MockAccount) GetAccount(id int64) (*domain.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", id)
-	ret0, _ := ret[0].(repository.Account)
+	ret0, _ := ret[0].(*domain.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -80,10 +79,10 @@ func (mr *MockAccountMockRecorder) GetAccount(id interface{}) *gomock.Call {
 }
 
 // GetAllAccounts mocks base method.
-func (m *MockAccount) GetAllAccounts() ([]repository.Account, error) {
+func (m *MockAccount) GetAllAccounts() ([]domain.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllAccounts")
-	ret0, _ := ret[0].([]repository.Account)
+	ret0, _ := ret[0].([]domain.Account)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -132,12 +131,11 @@ func (m *MockEntry) EXPECT() *MockEntryMockRecorder {
 }
 
 // CreateEntry mocks base method.
-func (m *MockEntry) CreateEntry(input service.CreateEntryInput) (int64, error) {
+func (m *MockEntry) CreateEntry(input service.CreateEntryInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateEntry", input)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // CreateEntry indicates an expected call of CreateEntry.
@@ -161,10 +159,10 @@ func (mr *MockEntryMockRecorder) DeleteEntry(id interface{}) *gomock.Call {
 }
 
 // GetAllEntries mocks base method.
-func (m *MockEntry) GetAllEntries() ([]repository.Entry, error) {
+func (m *MockEntry) GetAllEntries() ([]domain.Entry, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllEntries")
-	ret0, _ := ret[0].([]repository.Entry)
+	ret0, _ := ret[0].([]domain.Entry)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -176,10 +174,10 @@ func (mr *MockEntryMockRecorder) GetAllEntries() *gomock.Call {
 }
 
 // GetEntry mocks base method.
-func (m *MockEntry) GetEntry(id int64) (repository.Entry, error) {
+func (m *MockEntry) GetEntry(id int64) (*domain.Entry, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetEntry", id)
-	ret0, _ := ret[0].(repository.Entry)
+	ret0, _ := ret[0].(*domain.Entry)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -204,98 +202,69 @@ func (mr *MockEntryMockRecorder) UpdateEntry(input interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateEntry", reflect.TypeOf((*MockEntry)(nil).UpdateEntry), input)
 }
 
-// MockTransferServiceInterface is a mock of TransferServiceInterface interface.
-type MockTransferServiceInterface struct {
+// MockTransfer is a mock of Transfer interface.
+type MockTransfer struct {
 	ctrl     *gomock.Controller
-	recorder *MockTransferServiceInterfaceMockRecorder
+	recorder *MockTransferMockRecorder
 }
 
-// MockTransferServiceInterfaceMockRecorder is the mock recorder for MockTransferServiceInterface.
-type MockTransferServiceInterfaceMockRecorder struct {
-	mock *MockTransferServiceInterface
+// MockTransferMockRecorder is the mock recorder for MockTransfer.
+type MockTransferMockRecorder struct {
+	mock *MockTransfer
 }
 
-// NewMockTransferServiceInterface creates a new mock instance.
-func NewMockTransferServiceInterface(ctrl *gomock.Controller) *MockTransferServiceInterface {
-	mock := &MockTransferServiceInterface{ctrl: ctrl}
-	mock.recorder = &MockTransferServiceInterfaceMockRecorder{mock}
+// NewMockTransfer creates a new mock instance.
+func NewMockTransfer(ctrl *gomock.Controller) *MockTransfer {
+	mock := &MockTransfer{ctrl: ctrl}
+	mock.recorder = &MockTransferMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockTransferServiceInterface) EXPECT() *MockTransferServiceInterfaceMockRecorder {
+func (m *MockTransfer) EXPECT() *MockTransferMockRecorder {
 	return m.recorder
 }
 
 // CreateTransfer mocks base method.
-func (m *MockTransferServiceInterface) CreateTransfer(input service.CreateTransferInput) (int64, error) {
+func (m *MockTransfer) CreateTransfer(input service.CreateTransferInput) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateTransfer", input)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateTransfer indicates an expected call of CreateTransfer.
-func (mr *MockTransferServiceInterfaceMockRecorder) CreateTransfer(input interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockTransferServiceInterface)(nil).CreateTransfer), input)
-}
-
-// DeleteTransfer mocks base method.
-func (m *MockTransferServiceInterface) DeleteTransfer(id int64) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteTransfer", id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteTransfer indicates an expected call of DeleteTransfer.
-func (mr *MockTransferServiceInterfaceMockRecorder) DeleteTransfer(id interface{}) *gomock.Call {
+// CreateTransfer indicates an expected call of CreateTransfer.
+func (mr *MockTransferMockRecorder) CreateTransfer(input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTransfer", reflect.TypeOf((*MockTransferServiceInterface)(nil).DeleteTransfer), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTransfer", reflect.TypeOf((*MockTransfer)(nil).CreateTransfer), input)
 }
 
 // GetAllTransfers mocks base method.
-func (m *MockTransferServiceInterface) GetAllTransfers() ([]repository.Transfer, error) {
+func (m *MockTransfer) GetAllTransfers() ([]domain.Transfer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllTransfers")
-	ret0, _ := ret[0].([]repository.Transfer)
+	ret0, _ := ret[0].([]domain.Transfer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAllTransfers indicates an expected call of GetAllTransfers.
-func (mr *MockTransferServiceInterfaceMockRecorder) GetAllTransfers() *gomock.Call {
+func (mr *MockTransferMockRecorder) GetAllTransfers() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllTransfers", reflect.TypeOf((*MockTransferServiceInterface)(nil).GetAllTransfers))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllTransfers", reflect.TypeOf((*MockTransfer)(nil).GetAllTransfers))
 }
 
 // GetTransfer mocks base method.
-func (m *MockTransferServiceInterface) GetTransfer(id int64) (repository.Transfer, error) {
+func (m *MockTransfer) GetTransfer(id int64) (*domain.Transfer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTransfer", id)
-	ret0, _ := ret[0].(repository.Transfer)
+	ret0, _ := ret[0].(*domain.Transfer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTransfer indicates an expected call of GetTransfer.
-func (mr *MockTransferServiceInterfaceMockRecorder) GetTransfer(id interface{}) *gomock.Call {
+func (mr *MockTransferMockRecorder) GetTransfer(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfer", reflect.TypeOf((*MockTransferServiceInterface)(nil).GetTransfer), id)
-}
-
-// UpdateTransfer mocks base method.
-func (m *MockTransferServiceInterface) UpdateTransfer(input service.UpdateTransferInput) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateTransfer", input)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateTransfer indicates an expected call of UpdateTransfer.
-func (mr *MockTransferServiceInterfaceMockRecorder) UpdateTransfer(input interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTransfer", reflect.TypeOf((*MockTransferServiceInterface)(nil).UpdateTransfer), input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfer", reflect.TypeOf((*MockTransfer)(nil).GetTransfer), id)
 }

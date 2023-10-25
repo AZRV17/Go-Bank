@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -128,6 +129,8 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	log.Println(id)
 
 	if err := h.service.AccountService.DeleteAccount(int64(id)); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

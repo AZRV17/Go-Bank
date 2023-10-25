@@ -1,7 +1,12 @@
 package service
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/AZRV17/goWEB/internal/domain"
@@ -28,14 +33,16 @@ func (s *TransferService) CreateTransfer(input CreateTransferInput) error {
 		CreatedAt:     time.Now(),
 	}
 
+	if err := s.addMoney(input.FromAccountID, input.ToAccountID, input.Amount); err != nil {
+		return err
+	}
+
 	if _, err := s.repo.Create(transfer); err != nil {
 		log.Println(err)
 		return err
 	}
 
-	err := s.addMoney(input.FromAccountID, input.ToAccountID, input.Amount)
-
-	return err
+	return nil
 }
 
 func (s *TransferService) GetTransfer(id int64) (*domain.Transfer, error) {
@@ -49,13 +56,61 @@ func (s *TransferService) GetAllTransfers() ([]domain.Transfer, error) {
 }
 
 func (s *TransferService) addMoney(fromAccountID, toAccountID int64, amount int64) error {
+	fromAccount, err := s.accRepo.GetAccount(fromAccountID)
+	if err != nil {
+		return err
+	}
+
+	toAccount, err := s.accRepo.GetAccount(toAccountID)
+	if err != nil {
+		return err
+	}
+
+	if fromAccount.Balance < amount {
+		return errors.New("not enough money on account")
+	}
+
+	amountTo, err := calculateAmountByCurrency(amount, fromAccount.Currency, toAccount.Currency)
+	if err != nil {
+		return err
+	}
+
 	if err := s.accRepo.AddAccountBalance(fromAccountID, -amount); err != nil {
 		return err
 	}
 
-	if err := s.accRepo.AddAccountBalance(toAccountID, amount); err != nil {
+	if err := s.accRepo.AddAccountBalance(toAccountID, amountTo); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+type Currency struct {
+	Rates map[string]float32 `json:"rates"`
+}
+
+func calculateAmountByCurrency(amount int64, currencyFrom, currencyTo string) (int64, error) {
+	url := fmt.Sprintf(`https://openexchangerates.org/api/latest.json?app_id=e3b53564d7c64c0c8afa76b84d01403d&base=%s&symbols=%s`,
+		currencyFrom, currencyTo)
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("accept", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+
+	var rates Currency
+	if err := json.Unmarshal(body, &rates); err != nil {
+		return 0, err
+	}
+
+	if rate, ok := rates.Rates[currencyTo]; ok {
+		return amount * int64(rate), nil
+	}
+
+	return 0, errors.New("invalid currency")
 }

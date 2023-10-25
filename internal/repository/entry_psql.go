@@ -53,7 +53,6 @@ func (repo *Entry) Create(entry domain.Entry) (*domain.Entry, error) {
 
 	tx.Commit()
 
-	repo.db.Last(entry)
 	return &entry, nil
 }
 

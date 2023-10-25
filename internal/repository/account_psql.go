@@ -24,10 +24,7 @@ func (repo *Account) Create(account domain.Account) (*domain.Account, error) {
 
 	tx.Commit()
 
-	var acc domain.Account
-	repo.db.Last(&acc)
-
-	return &acc, nil
+	return &account, nil
 }
 
 func (repo *Account) GetAccount(id int64) (*domain.Account, error) {

@@ -52,6 +52,5 @@ func (repo *Transfer) Create(transfer domain.Transfer) (*domain.Transfer, error)
 
 	tx.Commit()
 
-	//repo.db.Last(transfer)
 	return &transfer, nil
 }

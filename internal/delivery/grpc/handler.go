@@ -22,20 +22,3 @@ func (h *Handler) Init() {
 	v1 := v1.NewHandler(h.service, h.server)
 	v1.Init()
 }
-
-//type TransferServer struct {
-//	transferMap map[string]*proto.Transfer
-//	mutex       *sync.RWMutex
-//}
-//
-//func NewTransferServer() proto.TransferServiceServer {
-//	return &TransferServer{
-//		transferMap: make(map[string]*proto.Transfer),
-//		mutex:       &sync.RWMutex{},
-//	}
-//}
-//
-//func (s *TransferServer) CreateTransfer(ctx context.Context, request *proto.TransferRequest) (*proto.TransferResponse, error) {
-//	//TODO implement me
-//	panic("implement me")
-//}

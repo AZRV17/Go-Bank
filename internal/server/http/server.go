@@ -1,4 +1,4 @@
-package server
+package httpServer
 
 import (
 	"context"
@@ -19,7 +19,7 @@ type HttpServer struct {
 func NewHttpServer(cfg *config.Config, handler http.Handler) *HttpServer {
 	return &HttpServer{
 		httpServer: &http.Server{
-			Addr:    ":" + cfg.Server.Port,
+			Addr:    cfg.HTTP.Host + ":" + cfg.HTTP.Port,
 			Handler: handler,
 		},
 	}
@@ -29,6 +29,12 @@ func (s *HttpServer) Run() error {
 	return s.httpServer.ListenAndServe()
 }
 
+// Shutdown gracefully shuts down the HTTP server.
+//
+// It waits for an interrupt signal, then creates a context with a timeout of 10 seconds.
+// The HTTP server is then shutdown using the created context.
+// If there is an error during the shutdown, it is logged.
+// Finally, the 'stopped' channel is closed.
 func (s *HttpServer) Shutdown(stopped chan struct{}) {
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)

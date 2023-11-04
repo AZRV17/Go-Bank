@@ -13,7 +13,7 @@ type Accounts interface {
 	Update(account *domain.Account) error
 	Delete(id int64) error
 	GetAll() ([]domain.Account, error)
-	AddAccountBalance(id int64, amount int64) error
+	UpdateAccountBalance(id int64, amount int64) error
 }
 
 type Entries interface {

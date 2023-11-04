@@ -77,11 +77,11 @@ func (s *TransferService) addMoney(fromAccountID, toAccountID int64, amount int6
 		return err
 	}
 
-	if err := s.accRepo.AddAccountBalance(fromAccountID, -amount); err != nil {
+	if err := s.accRepo.UpdateAccountBalance(fromAccountID, -amount); err != nil {
 		return err
 	}
 
-	if err := s.accRepo.AddAccountBalance(toAccountID, amountTo); err != nil {
+	if err := s.accRepo.UpdateAccountBalance(toAccountID, amountTo); err != nil {
 		return err
 	}
 
@@ -122,7 +122,12 @@ func calculateAmountByCurrency(amount int64, currencyFrom, currencyTo string) (i
 
 	res, _ := http.DefaultClient.Do(req)
 
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(res.Body)
 	body, _ := io.ReadAll(res.Body)
 
 	var rates Currency

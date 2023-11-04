@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package transfer.v1;
+option go_package = "grpc/transfer/v1";
+
+import "transfer_model.proto";
+
+service TransferService {
+  rpc CreateTransfer(TransferRequest) returns (TransferResponse);
+}
+
+message TransferRequest {
+  string from_account_id = 1;
+  string to_account_id = 2;
+  int64 amount = 3;
+}
+
+message TransferResponse {
+  Transfer transfer = 1;
+}

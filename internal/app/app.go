@@ -3,16 +3,19 @@ package app
 import (
 	"errors"
 	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/AZRV17/goWEB/internal/config"
-	delivery "github.com/AZRV17/goWEB/internal/delivery/http"
+	deliveryGRPC "github.com/AZRV17/goWEB/internal/delivery/grpc"
+	deliveryHTTP "github.com/AZRV17/goWEB/internal/delivery/http"
 	"github.com/AZRV17/goWEB/internal/repository"
-	"github.com/AZRV17/goWEB/internal/server"
+	grpcServer "github.com/AZRV17/goWEB/internal/server/grpc"
+	"github.com/AZRV17/goWEB/internal/server/http"
 	"github.com/AZRV17/goWEB/internal/service"
 	"github.com/AZRV17/goWEB/pkg/db/psql"
+	"github.com/AZRV17/goWEB/pkg/redis"
 	"github.com/go-chi/chi/v5"
+	"google.golang.org/grpc"
+	"log"
+	"net/http"
 )
 
 func Run() {
@@ -31,27 +34,53 @@ func Run() {
 
 	defer psql.Close()
 
+	if err := redis.Connect(cfg); err != nil {
+		log.Fatal(err)
+	}
+
+	defer func() {
+		if err := redis.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	r := chi.NewRouter()
 
 	repo := repository.NewRepository(psql.DB)
-	service := service.NewService(repo)
-	handler := delivery.NewHandler(*service)
+	serv := service.NewService(repo)
 
-	handler.Init(r)
+	httpSrv := httpServer.NewHttpServer(cfg, r)
+	grpcSrv := grpcServer.NewGrpcServer(grpc.NewServer(), cfg)
 
-	srv := server.NewHttpServer(cfg, r)
+	httpHandler := deliveryHTTP.NewHandler(*serv)
+	httpHandler.Init(r)
+
+	grpcHandler := deliveryGRPC.NewHandler(*serv, grpcSrv.GrpcServer)
+	grpcHandler.Init()
 
 	// listen to OS signals and gracefully shutdown HTTP srv
 	stopped := make(chan struct{})
+	go httpSrv.Shutdown(stopped)
 
-	go srv.Shutdown(stopped)
+	// listen to OS signals and gracefully shutdown GRPC srv
+	go grpcSrv.Shutdown()
 
-	log.Printf("Starting HTTP srv on %s", ":"+cfg.Server.Port)
+	log.Printf("Starting HTTP srv on %s\n", cfg.HTTP.Host+":"+cfg.HTTP.Port)
+	log.Printf("Starting GRPC srv on %s\n", cfg.GRPC.Host+":"+cfg.GRPC.Port)
 
 	// start HTTP srv
-	if err := srv.Run(); !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalf("HTTP srv ListenAndServe Error: %v", err)
-	}
+	go func() {
+		if err := httpSrv.Run(); !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("HTTP srv ListenAndServe Error: %v", err)
+		}
+	}()
+
+	// start GRPC srv
+	go func() {
+		if err := grpcSrv.Run(); !errors.Is(err, grpc.ErrServerStopped) && err != nil {
+			log.Fatalf("GRPC srv ListenAndServe Error: %v", err)
+		}
+	}()
 
 	<-stopped
 

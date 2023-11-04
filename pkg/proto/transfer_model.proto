@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package transfer.v1;
+option go_package = "grpc/transfer/v1";
+
+message Transfer {
+  string id = 1;
+  string from_account_id = 2;
+  string to_account_id = 3;
+  int64 amount = 4;
+}

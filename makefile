@@ -9,3 +9,9 @@ migratedown:
 
 test:
 	go test ./... -v -cover
+
+coverage:
+	go test ./... -v -coverprofile=coverage.out
+
+proto:
+	protoc -I pkg/proto pkg/proto/* --go-grpc_out=internal/server/ --go_out=internal/server/

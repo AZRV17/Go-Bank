@@ -1,9 +1,13 @@
 package repository
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/AZRV17/goWEB/internal/domain"
+	"github.com/AZRV17/goWEB/pkg/redis"
 	"gorm.io/gorm"
+	"log"
 )
 
 type Account struct {
@@ -29,6 +33,21 @@ func (repo *Account) Create(account domain.Account) (*domain.Account, error) {
 
 func (repo *Account) GetAccount(id int64) (*domain.Account, error) {
 	var acc domain.Account
+
+	ctx := context.Background()
+
+	val := redis.Rdb.Get(ctx, "account:"+fmt.Sprint(int(id)))
+
+	if val.Val() != "" {
+		err := json.Unmarshal([]byte(val.Val()), &acc)
+		if err != nil {
+			return nil, err
+		}
+
+		log.Println("account found in redis")
+		return &acc, nil
+	}
+
 	tx := repo.db.Begin()
 
 	if err := tx.First(&acc, id).Error; err != nil {
@@ -37,6 +56,13 @@ func (repo *Account) GetAccount(id int64) (*domain.Account, error) {
 	}
 
 	tx.Commit()
+
+	data, err := json.Marshal(acc)
+	if err != nil {
+		return nil, err
+	}
+
+	redis.Rdb.Set(ctx, "account:"+fmt.Sprint(int(id)), data, 0)
 
 	return &acc, nil
 }
@@ -51,6 +77,8 @@ func (repo *Account) Update(acc *domain.Account) error {
 
 	tx.Commit()
 
+	redis.Rdb.Set(context.Background(), "account:"+fmt.Sprint(acc.ID), acc, 0)
+
 	return nil
 }
 
@@ -63,6 +91,8 @@ func (repo *Account) Delete(id int64) error {
 	}
 
 	tx.Commit()
+
+	redis.Rdb.Del(context.Background(), "account:"+fmt.Sprint(id))
 
 	return nil
 }
@@ -81,7 +111,7 @@ func (repo *Account) GetAll() ([]domain.Account, error) {
 	return accs, nil
 }
 
-func (repo *Account) AddAccountBalance(accID int64, amount int64) error {
+func (repo *Account) UpdateAccountBalance(accID int64, amount int64) error {
 	tx := repo.db.Begin()
 
 	if err := tx.Where("id = ?", accID).Update("balance", gorm.Expr("balance + ?", amount)).Error; err != nil {
@@ -90,5 +120,8 @@ func (repo *Account) AddAccountBalance(accID int64, amount int64) error {
 	}
 
 	tx.Commit()
+
+	redis.Rdb.Set(context.Background(), "account:"+fmt.Sprint(accID), accID, 0)
+
 	return nil
 }

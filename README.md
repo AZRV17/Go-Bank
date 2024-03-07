@@ -1,7 +1,9 @@
 # goWEB 
-## The main goal of this project.
-Learn to develop web-application in Go with Docker.
-## What was used?
-- Go 1.21.1
-- Postgres 14
-- Docker
+## Stack
+- Go
+- PostgreSQL
+- Redis
+## How to run
+- Build docker image `docker build -t go-web:local .`
+- Up docker-compose `docker-compose up`
+- Make request to the server `curl 127.0.0.1:8080/v1/`

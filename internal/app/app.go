@@ -24,8 +24,10 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.Host, cfg.Postgres.Port, cfg.Postgres.Db)
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.Host, cfg.Postgres.Port, cfg.Postgres.Db,
+	)
 
 	err = psql.Connect(dsn)
 	if err != nil {
@@ -45,6 +47,28 @@ func Run() {
 	}()
 
 	r := chi.NewRouter()
+
+	// CORS
+	r.Use(
+		func(next http.Handler) http.Handler {
+			return http.HandlerFunc(
+				func(w http.ResponseWriter, r *http.Request) {
+					w.Header().Set("Access-Control-Allow-Origin", "*")
+					w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+					w.Header().Set("Access-Control-Allow-Credentials", "true")
+					w.Header().Set("Content-Type", "application/json")
+
+					if r.Method == http.MethodOptions {
+						w.WriteHeader(http.StatusOK)
+						return
+					}
+
+					next.ServeHTTP(w, r)
+				},
+			)
+		},
+	)
 
 	repo := repository.NewRepository(psql.DB)
 	serv := service.NewService(repo)

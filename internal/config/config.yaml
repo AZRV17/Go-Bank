@@ -20,8 +20,14 @@ postgres-dev:
   password: sa
   db: gowebdb
 
-redis-dev:
+redis-prod:
   host: gw-redis
+  port: 6379
+  password: 1708
+  db: 0
+
+redis-dev:
+  host: 127.0.0.1
   port: 6379
   password: 1708
   db: 0
